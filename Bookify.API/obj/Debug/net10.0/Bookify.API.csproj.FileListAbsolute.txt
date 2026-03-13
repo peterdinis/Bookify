@@ -1,0 +1,8 @@
+/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/Debug/net10.0/Bookify.API.csproj.AssemblyReference.cache
+/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/Debug/net10.0/rpswa.dswa.cache.json
+/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/Debug/net10.0/Bookify.API.GeneratedMSBuildEditorConfig.editorconfig
+/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/Debug/net10.0/Bookify.API.AssemblyInfoInputs.cache
+/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/Debug/net10.0/Bookify.API.AssemblyInfo.cs
+/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/Debug/net10.0/Bookify.API.csproj.CoreCompileInputs.cache
+/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/Debug/net10.0/Bookify.API.MvcApplicationPartsAssemblyInfo.cs
+/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/Debug/net10.0/Bookify.API.MvcApplicationPartsAssemblyInfo.cache
