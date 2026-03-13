@@ -6,3 +6,4 @@
 /Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/Debug/net10.0/Bookify.API.csproj.CoreCompileInputs.cache
 /Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/Debug/net10.0/Bookify.API.MvcApplicationPartsAssemblyInfo.cs
 /Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/Debug/net10.0/Bookify.API.MvcApplicationPartsAssemblyInfo.cache
+/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/Debug/net10.0/Bookify.API.sourcelink.json

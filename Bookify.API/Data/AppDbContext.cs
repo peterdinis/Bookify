@@ -9,10 +9,10 @@ namespace Bookify.API.Data
         {
         }
 
-        public DbSet<User> Users { get; set; } => Set<User>();
-        public DbSet<Audiobook> Audiobooks { get; set; } => Set<Audiobook>();
-        public DbSet<Chapter> Chapters { get; set; } => Set<Chapter>();
-        public DbSet<PlaybackProgress> PlaybackProgresses { get; set; } => Set<PlaybackProgress>();
+        public DbSet<User> Users { get; set; }
+        public DbSet<Audiobook> Audiobooks { get; set; }
+        public DbSet<Chapter> Chapters { get; set; }
+        public DbSet<PlaybackProgress> PlaybackProgresses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
