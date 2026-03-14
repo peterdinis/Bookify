@@ -1,9 +1,11 @@
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OData;
 using Azure.Storage.Blobs;
 using Bookify.API.Data;
+using Bookify.API.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,36 +13,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddOData(options => options.Select().Filter().OrderBy().Expand().Count().SetMaxTop(100));
 
-// OpenAPI & Swagger
+// OpenAPI & Swagger (no Microsoft.OpenApi.Models – avoids conflict with Microsoft.OpenApi 2.x from ASP.NET Core 10)
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-    {
-        Title = "Bookify API",
-        Version = "v1",
-        Description = "Audiobook streaming API with Entra (Microsoft) authentication"
-    });
-    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Entra ID JWT Bearer token"
-    });
-    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference { Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "Bearer" }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
+builder.Services.AddSwaggerGen();
 
 // DbContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -101,7 +77,7 @@ using (var scope = app.Services.CreateScope())
     var devUserId = new Guid("00000000-0000-0000-0000-000000000001");
     if (app.Environment.IsDevelopment() && !dbContext.Users.Any(u => u.Id == devUserId))
     {
-        dbContext.Users.Add(new Bookify.API.Models.User
+        dbContext.Users.Add(new User
         {
             Id = devUserId,
             EntraId = "dev-mock-user",

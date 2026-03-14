@@ -207,3 +207,6 @@
 /Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/Debug/net10.0/Bookify.API.pdb
 /Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/Debug/net10.0/Bookify.API.genruntimeconfig.cache
 /Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/Debug/net10.0/ref/Bookify.API.dll
+/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/bin/Debug/net10.0/Swashbuckle.AspNetCore.Swagger.dll
+/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/bin/Debug/net10.0/Swashbuckle.AspNetCore.SwaggerGen.dll
+/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/bin/Debug/net10.0/Swashbuckle.AspNetCore.SwaggerUI.dll
