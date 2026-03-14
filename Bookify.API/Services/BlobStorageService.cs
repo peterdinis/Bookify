@@ -8,18 +8,11 @@ using Microsoft.Extensions.Configuration;
 
 namespace Bookify.API.Services
 {
-    public class BlobStorageService : IBlobStorageService
+    public class BlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration) : IBlobStorageService
     {
-        private readonly BlobServiceClient _blobServiceClient;
-        private readonly string _audioContainerName;
-        private readonly string _coverContainerName;
-
-        public BlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration)
-        {
-            _blobServiceClient = blobServiceClient;
-            _audioContainerName = configuration.GetValue<string>("Storage:AudioContainer") ?? "audiobooks";
-            _coverContainerName = configuration.GetValue<string>("Storage:CoverContainer") ?? "covers";
-        }
+        private readonly BlobServiceClient _blobServiceClient = blobServiceClient;
+        private readonly string _audioContainerName = configuration.GetValue<string>("Storage:AudioContainer") ?? "audiobooks";
+        private readonly string _coverContainerName = configuration.GetValue<string>("Storage:CoverContainer") ?? "covers";
 
         private async Task EnsureContainersCreatedAsync()
         {

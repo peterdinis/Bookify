@@ -46,8 +46,10 @@ namespace Bookify.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] CreateAudiobookDto dto)
+        public async Task<IActionResult> Post([FromBody] CreateAudiobookDto? dto)
         {
+            if (dto == null) return BadRequest("Request body is required.");
+
             var audiobook = new Audiobook
             {
                 Title = dto.Title,
@@ -84,12 +86,15 @@ namespace Bookify.API.Controllers
         }
 
         [HttpPost("{id}/chapters")]
-        public async Task<IActionResult> AddChapter(Guid id, [FromForm] CreateChapterDto dto)
+        public async Task<IActionResult> AddChapter(Guid id, [FromForm] CreateChapterDto? dto)
         {
+            if (dto == null) return BadRequest("Request body is required.");
+
             var audiobook = await _context.Audiobooks.FindAsync(id);
             if (audiobook == null) return NotFound("Audiobook not found.");
 
             if (dto.AudioFile == null || dto.AudioFile.Length == 0) return BadRequest("No audio file uploaded.");
+            if (dto.Order < 0) return BadRequest("Order must be non-negative.");
 
             var blobName = $"{id}/chapter-{dto.Order}-{Guid.NewGuid()}.mp3";
 

@@ -37,6 +37,12 @@ namespace Bookify.API.Data
                 .WithMany(u => u.Progresses)
                 .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PlaybackProgress>()
+                .HasOne(p => p.LastChapter)
+                .WithMany()
+                .HasForeignKey(p => p.LastChapterId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

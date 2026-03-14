@@ -30,12 +30,17 @@ namespace Bookify.API.Controllers
             var tenantId = section.GetValue<string>("TenantId");
             var clientId = section.GetValue<string>("ClientId");
 
+            var instanceTrimmed = instance.TrimEnd('/');
+            var authority = !string.IsNullOrEmpty(tenantId)
+                ? $"{instanceTrimmed}/{tenantId}"
+                : null;
+
             return Ok(new
             {
-                Instance = instance.TrimEnd('/'),
-                TenantId = tenantId,
-                ClientId = clientId,
-                Authority = $"{instance.TrimEnd('/')}/{tenantId}",
+                Instance = instanceTrimmed,
+                TenantId = tenantId ?? string.Empty,
+                ClientId = clientId ?? string.Empty,
+                Authority = authority,
                 Description = "Use these values in your SPA/mobile app to configure MSAL and sign in with Entra ID."
             });
         }

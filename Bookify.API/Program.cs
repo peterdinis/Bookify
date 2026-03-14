@@ -43,15 +43,19 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // DbContext
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? "Data Source=bookify.db";
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(connectionString));
 
 // Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
-// Azure Blob Storage
-builder.Services.AddSingleton(x => new BlobServiceClient(builder.Configuration.GetValue<string>("Storage:ConnectionString")));
+// Azure Blob Storage (use development storage when ConnectionString not set)
+var blobConnectionString = builder.Configuration.GetValue<string>("Storage:ConnectionString")
+    ?? "UseDevelopmentStorage=true";
+builder.Services.AddSingleton(_ => new BlobServiceClient(blobConnectionString));
 builder.Services.AddScoped<Bookify.API.Services.IBlobStorageService, Bookify.API.Services.BlobStorageService>();
 
 // Background Worker
@@ -87,11 +91,25 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Auto-migrate on startup for dev
+// Auto-migrate and seed on startup
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.EnsureCreated(); // Simple approach for dev
+    dbContext.Database.EnsureCreated();
+
+    // Ensure default dev user exists so playback endpoints work when auth is not yet configured
+    var devUserId = new Guid("00000000-0000-0000-0000-000000000001");
+    if (app.Environment.IsDevelopment() && !dbContext.Users.Any(u => u.Id == devUserId))
+    {
+        dbContext.Users.Add(new Bookify.API.Models.User
+        {
+            Id = devUserId,
+            EntraId = "dev-mock-user",
+            Role = "User",
+            IsActive = true
+        });
+        dbContext.SaveChanges();
+    }
 }
 
 app.Run();
