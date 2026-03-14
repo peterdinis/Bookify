@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 using Bookify.API.Data;
 
 namespace Bookify.API.Controllers
@@ -30,7 +29,9 @@ namespace Bookify.API.Controllers
         }
 
         [HttpPost("users/{userId}/deactivate")]
-        public async Task<IActionResult> DeactivateUser(Guid userId, [FromQuery] bool deactivate = true)
+        public async Task<IActionResult> DeactivateUser(
+            Guid userId,
+            [FromQuery] bool deactivate = true)
         {
             var user = await _context.Users.FindAsync(userId);
             if (user == null) return NotFound("User not found.");
