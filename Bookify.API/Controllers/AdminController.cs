@@ -2,9 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Bookify.API.Data;
-using System.Threading.Tasks;
-using System.Linq;
-using System;
 
 namespace Bookify.API.Controllers
 {

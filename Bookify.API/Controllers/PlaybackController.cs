@@ -5,9 +5,6 @@ using Bookify.API.Data;
 using Bookify.API.Models;
 using Bookify.API.DTOs;
 using Bookify.API.Services;
-using System.Threading.Tasks;
-using System.Linq;
-using System;
 
 namespace Bookify.API.Controllers
 {
@@ -52,8 +49,10 @@ namespace Bookify.API.Controllers
         }
 
         [HttpPost("progress")]
-        public async Task<IActionResult> SaveProgress([FromBody] SaveProgressDto dto)
+        public async Task<IActionResult> SaveProgress([FromBody] SaveProgressDto? dto)
         {
+            if (dto == null) return BadRequest("Request body is required.");
+
             var userId = GetCurrentUserId();
 
             var progress = await _context.PlaybackProgresses

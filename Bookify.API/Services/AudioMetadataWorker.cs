@@ -4,11 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Azure.Storage.Blobs;
 using Bookify.API.Data;
-using System;
 using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Bookify.API.Services
 {
@@ -19,7 +15,7 @@ namespace Bookify.API.Services
         private readonly ILogger<AudioMetadataWorker> _logger;
         private readonly string _audioContainerName;
 
-        public AudioMetadataWorker(IServiceProvider serviceProvider, BlobServiceClient blobServiceClient, ILogger<AudioMetadataWorker> logger, Microsoft.Extensions.Configuration.IConfiguration config)
+        public AudioMetadataWorker(IServiceProvider serviceProvider, BlobServiceClient blobServiceClient, ILogger<AudioMetadataWorker> logger, IConfiguration config)
         {
             _serviceProvider = serviceProvider;
             _blobServiceClient = blobServiceClient;
@@ -55,7 +51,7 @@ namespace Bookify.API.Services
                                 
                                 using (var tfile = TagLib.File.Create(tempFile))
                                 {
-                                    chapter.DurationSeconds = tfile.Properties.Duration.TotalSeconds;
+                                    chapter.DurationSeconds = tfile.Properties?.Duration.TotalSeconds ?? 0;
                                 }
                                 
                                 _logger.LogInformation($"Processed duration for chapter {chapter.Id}: {chapter.DurationSeconds}s");

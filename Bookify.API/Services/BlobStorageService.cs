@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
@@ -42,7 +39,7 @@ namespace Bookify.API.Services
 
             await blobClient.UploadAsync(content, new BlobHttpHeaders { ContentType = contentType });
 
-            return blobClient.Uri.ToString();
+            return blobClient.Uri?.ToString() ?? string.Empty;
         }
 
         public string GetAudioSasUrl(string blobName, TimeSpan expiresIn)
@@ -67,14 +64,14 @@ namespace Bookify.API.Services
             sasBuilder.SetPermissions(BlobSasPermissions.Read);
             var sasUri = blobClient.GenerateSasUri(sasBuilder);
 
-            return sasUri.ToString();
+            return sasUri?.ToString() ?? string.Empty;
         }
 
         public string GetCoverUrl(string blobName)
         {
             var containerClient = _blobServiceClient.GetBlobContainerClient(_coverContainerName);
             var blobClient = containerClient.GetBlobClient(blobName);
-            return blobClient.Uri.ToString();
+            return blobClient.Uri?.ToString() ?? string.Empty;
         }
     }
 }

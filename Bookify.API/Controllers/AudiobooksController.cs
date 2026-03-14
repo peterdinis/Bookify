@@ -6,9 +6,6 @@ using Bookify.API.Data;
 using Bookify.API.Models;
 using Bookify.API.DTOs;
 using Bookify.API.Services;
-using System.Threading.Tasks;
-using System.Linq;
-using System;
 
 namespace Bookify.API.Controllers
 {
@@ -73,7 +70,7 @@ namespace Bookify.API.Controllers
 
             if (coverImage == null || coverImage.Length == 0) return BadRequest("No image uploaded.");
 
-            var ext = System.IO.Path.GetExtension(coverImage.FileName);
+            var ext = Path.GetExtension(coverImage.FileName ?? "cover");
             var blobName = $"{id}{ext}";
 
             using var stream = coverImage.OpenReadStream();
