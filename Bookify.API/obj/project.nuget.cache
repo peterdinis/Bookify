@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "ssx3l98CAvc=",
+  "dgSpecHash": "/Bhv+Nlt2D4=",
   "success": true,
   "projectFilePath": "/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/Bookify.API.csproj",
   "expectedPackageFiles": [
@@ -35,6 +35,7 @@
     "/Users/peterdinis/.nuget/packages/microsoft.entityframeworkcore.sqlite/10.0.5/microsoft.entityframeworkcore.sqlite.10.0.5.nupkg.sha512",
     "/Users/peterdinis/.nuget/packages/microsoft.entityframeworkcore.sqlite.core/10.0.5/microsoft.entityframeworkcore.sqlite.core.10.0.5.nupkg.sha512",
     "/Users/peterdinis/.nuget/packages/microsoft.entityframeworkcore.sqlserver/10.0.5/microsoft.entityframeworkcore.sqlserver.10.0.5.nupkg.sha512",
+    "/Users/peterdinis/.nuget/packages/microsoft.extensions.apidescription.server/6.0.5/microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
     "/Users/peterdinis/.nuget/packages/microsoft.extensions.dependencymodel/10.0.5/microsoft.extensions.dependencymodel.10.0.5.nupkg.sha512",
     "/Users/peterdinis/.nuget/packages/microsoft.identity.abstractions/11.1.0/microsoft.identity.abstractions.11.1.0.nupkg.sha512",
     "/Users/peterdinis/.nuget/packages/microsoft.identity.client/4.82.0/microsoft.identity.client.4.82.0.nupkg.sha512",
@@ -66,6 +67,10 @@
     "/Users/peterdinis/.nuget/packages/sqlitepclraw.core/2.1.11/sqlitepclraw.core.2.1.11.nupkg.sha512",
     "/Users/peterdinis/.nuget/packages/sqlitepclraw.lib.e_sqlite3/2.1.11/sqlitepclraw.lib.e_sqlite3.2.1.11.nupkg.sha512",
     "/Users/peterdinis/.nuget/packages/sqlitepclraw.provider.e_sqlite3/2.1.11/sqlitepclraw.provider.e_sqlite3.2.1.11.nupkg.sha512",
+    "/Users/peterdinis/.nuget/packages/swashbuckle.aspnetcore/7.2.0/swashbuckle.aspnetcore.7.2.0.nupkg.sha512",
+    "/Users/peterdinis/.nuget/packages/swashbuckle.aspnetcore.swagger/7.2.0/swashbuckle.aspnetcore.swagger.7.2.0.nupkg.sha512",
+    "/Users/peterdinis/.nuget/packages/swashbuckle.aspnetcore.swaggergen/7.2.0/swashbuckle.aspnetcore.swaggergen.7.2.0.nupkg.sha512",
+    "/Users/peterdinis/.nuget/packages/swashbuckle.aspnetcore.swaggerui/7.2.0/swashbuckle.aspnetcore.swaggerui.7.2.0.nupkg.sha512",
     "/Users/peterdinis/.nuget/packages/system.clientmodel/1.8.0/system.clientmodel.1.8.0.nupkg.sha512",
     "/Users/peterdinis/.nuget/packages/system.codedom/6.0.0/system.codedom.6.0.0.nupkg.sha512",
     "/Users/peterdinis/.nuget/packages/system.componentmodel.annotations/4.6.0/system.componentmodel.annotations.4.6.0.nupkg.sha512",
