@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace Bookify.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -29,6 +29,16 @@ namespace Bookify.API.Controllers
             var instance = section.GetValue<string>("Instance") ?? "https://login.microsoftonline.com/";
             var tenantId = section.GetValue<string>("TenantId");
             var clientId = section.GetValue<string>("ClientId");
+            var redirectUri = section.GetValue<string>("RedirectUri");
+            if (string.IsNullOrWhiteSpace(redirectUri))
+            {
+                redirectUri = Url.ActionLink(
+                    action: nameof(OAuthCallback),
+                    controller: "Auth",
+                    values: null,
+                    protocol: Request.Scheme,
+                    host: Request.Host.Value) ?? string.Empty;
+            }
 
             var instanceTrimmed = instance.TrimEnd('/');
             var authority = !string.IsNullOrEmpty(tenantId)
@@ -41,7 +51,37 @@ namespace Bookify.API.Controllers
                 TenantId = tenantId ?? string.Empty,
                 ClientId = clientId ?? string.Empty,
                 Authority = authority,
-                Description = "Use these values in your SPA/mobile app to configure MSAL and sign in with Entra ID."
+                RedirectUri = redirectUri,
+                Description = "Use Instance, TenantId, ClientId and Authority in MSAL. Register RedirectUri in Entra ID (Authentication → add URI) if this backend URL should receive the OAuth redirect; for classic SPA+PKCE, the SPA URL is usually the redirect instead."
+            });
+        }
+
+        /// <summary>
+        /// OAuth redirect target for Entra ID (optional). Register the same URL in Azure under Redirect URIs (Web or SPA, per your flow).
+        /// </summary>
+        [HttpGet("callback")]
+        [AllowAnonymous]
+        public IActionResult OAuthCallback(
+            [FromQuery] string? code,
+            [FromQuery] string? state,
+            [FromQuery] string? error,
+            [FromQuery] string? error_description)
+        {
+            if (!string.IsNullOrEmpty(error))
+                return BadRequest(new { error, error_description });
+
+            if (!string.IsNullOrEmpty(code))
+            {
+                return Ok(new
+                {
+                    message = "Authorization code received at the API. Standard MSAL browser login uses PKCE on the SPA redirect URI; exchanging the code on the server requires a confidential client and is not implemented here."
+                });
+            }
+
+            return Ok(new
+            {
+                message = "Bookify API OAuth callback endpoint. Use this exact URL as a Redirect URI in Entra ID when you want Microsoft to return here after sign-in.",
+                url = Url.ActionLink(nameof(OAuthCallback), "Auth", values: null, protocol: Request.Scheme, host: Request.Host.Value)
             });
         }
 
