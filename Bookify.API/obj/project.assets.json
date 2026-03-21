@@ -4788,7 +4788,7 @@
     ]
   },
   "packageFolders": {
-    "/var/folders/xb/vrgmk5s507z8kxzn4b2c_3tr0000gn/T/cursor-sandbox-cache/3694f54020b0ddb0bef2a5a5999fd45c/nuget": {}
+    "/Users/peterdinis/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
@@ -4796,7 +4796,7 @@
       "projectUniqueName": "/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/Bookify.API.csproj",
       "projectName": "Bookify.API",
       "projectPath": "/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/Bookify.API.csproj",
-      "packagesPath": "/var/folders/xb/vrgmk5s507z8kxzn4b2c_3tr0000gn/T/cursor-sandbox-cache/3694f54020b0ddb0bef2a5a5999fd45c/nuget",
+      "packagesPath": "/Users/peterdinis/.nuget/packages/",
       "outputPath": "/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
@@ -5305,13 +5305,5 @@
         }
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1900",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Error occurred while getting package vulnerability data: Access to the path '/Users/peterdinis/.local/share/NuGet/http-cache/670c1461c29885f9aa22c281d8b7da90845b38e4$ps:_api.nuget.org_v3_index.json/vuln_index.dat-new' is denied."
-    }
-  ]
+  }
 }

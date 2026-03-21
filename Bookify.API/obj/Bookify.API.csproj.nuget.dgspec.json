@@ -10,7 +10,7 @@
         "projectUniqueName": "/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/Bookify.API.csproj",
         "projectName": "Bookify.API",
         "projectPath": "/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/Bookify.API.csproj",
-        "packagesPath": "/var/folders/xb/vrgmk5s507z8kxzn4b2c_3tr0000gn/T/cursor-sandbox-cache/3694f54020b0ddb0bef2a5a5999fd45c/nuget",
+        "packagesPath": "/Users/peterdinis/.nuget/packages/",
         "outputPath": "/Users/peterdinis/Desktop/work/bookify/backend/Bookify.API/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
