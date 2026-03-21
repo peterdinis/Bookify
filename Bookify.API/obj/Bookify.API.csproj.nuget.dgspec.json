@@ -76,7 +76,7 @@
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
-              "version": "[7.2.0, )"
+              "version": "[10.1.5, )"
             },
             "TagLibSharp": {
               "target": "Package",
