@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.Mvc;
 using Azure.Storage.Blobs;
 using Bookify.API.Data;
 using Bookify.API.Models;
