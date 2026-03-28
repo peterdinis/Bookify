@@ -5,10 +5,14 @@ using Microsoft.AspNetCore.OData;
 using Azure.Storage.Blobs;
 using Bookify.API.Data;
 using Bookify.API.Models;
+using Bookify.API.Middleware;
 
 var  MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddCors(options =>
 {
@@ -21,7 +25,22 @@ builder.Services.AddCors(options =>
 
 // Add services to the container.
 builder.Services.AddControllers()
-    .AddOData(options => options.Select().Filter().OrderBy().Expand().Count().SetMaxTop(100));
+    .AddOData(options => options.Select().Filter().OrderBy().Expand().Count().SetMaxTop(100))
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var problemDetails = new ValidationProblemDetails(context.ModelState)
+            {
+                Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1",
+                Status = StatusCodes.Status400BadRequest,
+                Title = "One or more validation errors occurred.",
+                Detail = "Please refer to the errors property for additional details.",
+                Instance = context.HttpContext.Request.Path
+            };
+            return new BadRequestObjectResult(problemDetails);
+        };
+    });
 
 // OpenAPI & Swagger (no Microsoft.OpenApi.Models – avoids conflict with Microsoft.OpenApi 2.x from ASP.NET Core 10)
 builder.Services.AddOpenApi();
@@ -56,6 +75,8 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

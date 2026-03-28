@@ -45,15 +45,31 @@ namespace Bookify.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateAudiobookDto? dto)
         {
-            if (dto == null) return BadRequest("Request body is required.");
+            if (dto == null) return BadRequest(new ProblemDetails 
+            { 
+                Title = "Invalid Request", 
+                Detail = "Request body is required." 
+            });
+
+            if (string.IsNullOrWhiteSpace(dto.Title))
+                return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]> 
+                { 
+                    ["Title"] = new[] { "The Title field is required." } 
+                }));
+
+            if (string.IsNullOrWhiteSpace(dto.Author))
+                return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]> 
+                { 
+                    ["Author"] = new[] { "The Author field is required." } 
+                }));
 
             var audiobook = new Audiobook
             {
-                Title = dto.Title,
-                Author = dto.Author,
-                Category = dto.Category,
-                Genre = dto.Genre,
-                Description = dto.Description
+                Title = dto.Title.Trim(),
+                Author = dto.Author.Trim(),
+                Category = dto.Category?.Trim() ?? string.Empty,
+                Genre = dto.Genre?.Trim() ?? string.Empty,
+                Description = dto.Description?.Trim() ?? string.Empty
             };
 
             _context.Audiobooks.Add(audiobook);
