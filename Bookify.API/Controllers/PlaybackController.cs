@@ -1,10 +1,9 @@
+using Bookify.API.Data;
+using Bookify.API.DTOs;
+using Bookify.API.Models;
+using Bookify.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-using Bookify.API.Data;
-using Bookify.API.Models;
-using Bookify.API.DTOs;
-using Bookify.API.Services;
 
 namespace Bookify.API.Controllers
 {
@@ -32,15 +31,22 @@ namespace Bookify.API.Controllers
         [HttpGet("{audiobookId}/chapter/{chapterId}/stream")]
         public async Task<IActionResult> GetStreamUrl(Guid audiobookId, Guid chapterId)
         {
-            var chapter = await _context.Chapters.FirstOrDefaultAsync(c => c.Id == chapterId && c.AudiobookId == audiobookId);
-            if (chapter == null) return NotFound("Chapter not found.");
+            var chapter = await _context.Chapters.FirstOrDefaultAsync(c =>
+                c.Id == chapterId && c.AudiobookId == audiobookId
+            );
+            if (chapter == null)
+                return NotFound("Chapter not found.");
 
             // Generate SAS url valid for 2 hours
-            var sasUrl = _blobStorageService.GetAudioSasUrl(chapter.AudioBlobName, TimeSpan.FromHours(2));
+            var sasUrl = _blobStorageService.GetAudioSasUrl(
+                chapter.AudioBlobName,
+                TimeSpan.FromHours(2)
+            );
 
             // Increment play count (simple approach, should ideally be done differently to avoid abuse)
             var audiobook = await _context.Audiobooks.FindAsync(audiobookId);
-            if(audiobook != null) {
+            if (audiobook != null)
+            {
                 audiobook.PlayCount++;
                 await _context.SaveChangesAsync();
             }
@@ -51,12 +57,14 @@ namespace Bookify.API.Controllers
         [HttpPost("progress")]
         public async Task<IActionResult> SaveProgress([FromBody] SaveProgressDto? dto)
         {
-            if (dto == null) return BadRequest("Request body is required.");
+            if (dto == null)
+                return BadRequest("Request body is required.");
 
             var userId = GetCurrentUserId();
 
-            var progress = await _context.PlaybackProgresses
-                .FirstOrDefaultAsync(p => p.UserId == userId && p.AudiobookId == dto.AudiobookId);
+            var progress = await _context.PlaybackProgresses.FirstOrDefaultAsync(p =>
+                p.UserId == userId && p.AudiobookId == dto.AudiobookId
+            );
 
             if (progress == null)
             {
@@ -66,7 +74,7 @@ namespace Bookify.API.Controllers
                     AudiobookId = dto.AudiobookId,
                     LastChapterId = dto.ChapterId,
                     PositionSeconds = dto.PositionSeconds,
-                    LastUpdated = DateTime.UtcNow
+                    LastUpdated = DateTime.UtcNow,
                 };
                 _context.PlaybackProgresses.Add(progress);
             }
@@ -87,11 +95,12 @@ namespace Bookify.API.Controllers
         {
             var userId = GetCurrentUserId();
 
-            var progress = await _context.PlaybackProgresses
-                .Include(p => p.LastChapter)
+            var progress = await _context
+                .PlaybackProgresses.Include(p => p.LastChapter)
                 .FirstOrDefaultAsync(p => p.UserId == userId && p.AudiobookId == audiobookId);
 
-            if (progress == null) return NotFound();
+            if (progress == null)
+                return NotFound();
 
             return Ok(progress);
         }

@@ -12,12 +12,15 @@ namespace Bookify.API.Controllers
         [HttpGet("ping")]
         public IActionResult Ping()
         {
-            return Ok(new
-            {
-                message = "pong",
-                timestamp = DateTime.UtcNow.ToString("O"),
-                environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"
-            });
+            return Ok(
+                new
+                {
+                    message = "pong",
+                    timestamp = DateTime.UtcNow.ToString("O"),
+                    environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+                        ?? "Production",
+                }
+            );
         }
     }
 }

@@ -1,6 +1,6 @@
+using Bookify.API.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Bookify.API.Data;
 
 namespace Bookify.API.Controllers
 {
@@ -20,7 +20,8 @@ namespace Bookify.API.Controllers
         public async Task<IActionResult> ApproveAudiobook(Guid id, [FromQuery] bool approve = true)
         {
             var audiobook = await _context.Audiobooks.FindAsync(id);
-            if (audiobook == null) return NotFound("Audiobook not found.");
+            if (audiobook == null)
+                return NotFound("Audiobook not found.");
 
             audiobook.IsApproved = approve;
             await _context.SaveChangesAsync();
@@ -31,10 +32,12 @@ namespace Bookify.API.Controllers
         [HttpPost("users/{userId}/deactivate")]
         public async Task<IActionResult> DeactivateUser(
             Guid userId,
-            [FromQuery] bool deactivate = true)
+            [FromQuery] bool deactivate = true
+        )
         {
             var user = await _context.Users.FindAsync(userId);
-            if (user == null) return NotFound("User not found.");
+            if (user == null)
+                return NotFound("User not found.");
 
             user.IsActive = !deactivate;
             await _context.SaveChangesAsync();
@@ -49,12 +52,14 @@ namespace Bookify.API.Controllers
             var totalAudiobooks = await _context.Audiobooks.CountAsync();
             var totalPlays = await _context.Audiobooks.SumAsync(a => a.PlayCount);
 
-            return Ok(new
-            {
-                TotalUsers = totalUsers,
-                TotalAudiobooks = totalAudiobooks,
-                TotalPlays = totalPlays
-            });
+            return Ok(
+                new
+                {
+                    TotalUsers = totalUsers,
+                    TotalAudiobooks = totalAudiobooks,
+                    TotalPlays = totalPlays,
+                }
+            );
         }
     }
 }

@@ -1,11 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.OData.Query;
-using Microsoft.AspNetCore.Authorization;
 using Bookify.API.Data;
-using Bookify.API.Models;
 using Bookify.API.DTOs;
+using Bookify.API.Models;
 using Bookify.API.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bookify.API.Controllers
 {
@@ -33,11 +32,12 @@ namespace Bookify.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
         {
-            var audiobook = await _context.Audiobooks
-                .Include(a => a.Chapters)
+            var audiobook = await _context
+                .Audiobooks.Include(a => a.Chapters)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
-            if (audiobook == null) return NotFound();
+            if (audiobook == null)
+                return NotFound();
 
             return Ok(audiobook);
         }
@@ -45,23 +45,34 @@ namespace Bookify.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateAudiobookDto? dto)
         {
-            if (dto == null) return BadRequest(new ProblemDetails 
-            { 
-                Title = "Invalid Request", 
-                Detail = "Request body is required." 
-            });
+            if (dto == null)
+                return BadRequest(
+                    new ProblemDetails
+                    {
+                        Title = "Invalid Request",
+                        Detail = "Request body is required.",
+                    }
+                );
 
             if (string.IsNullOrWhiteSpace(dto.Title))
-                return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]> 
-                { 
-                    ["Title"] = new[] { "The Title field is required." } 
-                }));
+                return BadRequest(
+                    new ValidationProblemDetails(
+                        new Dictionary<string, string[]>
+                        {
+                            ["Title"] = new[] { "The Title field is required." },
+                        }
+                    )
+                );
 
             if (string.IsNullOrWhiteSpace(dto.Author))
-                return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]> 
-                { 
-                    ["Author"] = new[] { "The Author field is required." } 
-                }));
+                return BadRequest(
+                    new ValidationProblemDetails(
+                        new Dictionary<string, string[]>
+                        {
+                            ["Author"] = new[] { "The Author field is required." },
+                        }
+                    )
+                );
 
             var audiobook = new Audiobook
             {
@@ -69,7 +80,7 @@ namespace Bookify.API.Controllers
                 Author = dto.Author.Trim(),
                 Category = dto.Category?.Trim() ?? string.Empty,
                 Genre = dto.Genre?.Trim() ?? string.Empty,
-                Description = dto.Description?.Trim() ?? string.Empty
+                Description = dto.Description?.Trim() ?? string.Empty,
             };
 
             _context.Audiobooks.Add(audiobook);
@@ -82,15 +93,21 @@ namespace Bookify.API.Controllers
         public async Task<IActionResult> UploadCover(Guid id, IFormFile coverImage)
         {
             var audiobook = await _context.Audiobooks.FindAsync(id);
-            if (audiobook == null) return NotFound("Audiobook not found.");
+            if (audiobook == null)
+                return NotFound("Audiobook not found.");
 
-            if (coverImage == null || coverImage.Length == 0) return BadRequest("No image uploaded.");
+            if (coverImage == null || coverImage.Length == 0)
+                return BadRequest("No image uploaded.");
 
             var ext = Path.GetExtension(coverImage.FileName ?? "cover");
             var blobName = $"{id}{ext}";
 
             using var stream = coverImage.OpenReadStream();
-            var coverUrl = await _blobStorageService.UploadCoverAsync(blobName, stream, coverImage.ContentType);
+            var coverUrl = await _blobStorageService.UploadCoverAsync(
+                blobName,
+                stream,
+                coverImage.ContentType
+            );
 
             audiobook.CoverUrl = coverUrl;
             await _context.SaveChangesAsync();
@@ -101,13 +118,17 @@ namespace Bookify.API.Controllers
         [HttpPost("{id}/chapters")]
         public async Task<IActionResult> AddChapter(Guid id, [FromForm] CreateChapterDto? dto)
         {
-            if (dto == null) return BadRequest("Request body is required.");
+            if (dto == null)
+                return BadRequest("Request body is required.");
 
             var audiobook = await _context.Audiobooks.FindAsync(id);
-            if (audiobook == null) return NotFound("Audiobook not found.");
+            if (audiobook == null)
+                return NotFound("Audiobook not found.");
 
-            if (dto.AudioFile == null || dto.AudioFile.Length == 0) return BadRequest("No audio file uploaded.");
-            if (dto.Order < 0) return BadRequest("Order must be non-negative.");
+            if (dto.AudioFile == null || dto.AudioFile.Length == 0)
+                return BadRequest("No audio file uploaded.");
+            if (dto.Order < 0)
+                return BadRequest("Order must be non-negative.");
 
             var blobName = $"{id}/chapter-{dto.Order}-{Guid.NewGuid()}.mp3";
 
@@ -121,7 +142,7 @@ namespace Bookify.API.Controllers
                 Title = dto.Title,
                 Order = dto.Order,
                 AudioBlobName = blobName,
-                DurationSeconds = 0 // Will be handled by background worker or extracted here
+                DurationSeconds = 0, // Will be handled by background worker or extracted here
             };
 
             _context.Chapters.Add(chapter);
@@ -134,7 +155,8 @@ namespace Bookify.API.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             var audiobook = await _context.Audiobooks.FindAsync(id);
-            if (audiobook == null) return NotFound();
+            if (audiobook == null)
+                return NotFound();
 
             _context.Audiobooks.Remove(audiobook);
             await _context.SaveChangesAsync();
