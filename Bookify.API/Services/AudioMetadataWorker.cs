@@ -1,29 +1,21 @@
-using System.IO;
 using Azure.Storage.Blobs;
 using Bookify.API.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bookify.API.Services
 {
-    public class AudioMetadataWorker : BackgroundService
+    public class AudioMetadataWorker(
+        IServiceProvider serviceProvider,
+        BlobServiceClient blobServiceClient,
+        ILogger<AudioMetadataWorker> logger,
+        IConfiguration config
+    ) : BackgroundService
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly BlobServiceClient _blobServiceClient;
-        private readonly ILogger<AudioMetadataWorker> _logger;
-        private readonly string _audioContainerName;
-
-        public AudioMetadataWorker(
-            IServiceProvider serviceProvider,
-            BlobServiceClient blobServiceClient,
-            ILogger<AudioMetadataWorker> logger,
-            IConfiguration config
-        )
-        {
-            _serviceProvider = serviceProvider;
-            _blobServiceClient = blobServiceClient;
-            _logger = logger;
-            _audioContainerName = config.GetValue<string>("Storage:AudioContainer") ?? "audiobooks";
-        }
+        private readonly IServiceProvider _serviceProvider = serviceProvider;
+        private readonly BlobServiceClient _blobServiceClient = blobServiceClient;
+        private readonly ILogger<AudioMetadataWorker> _logger = logger;
+        private readonly string _audioContainerName =
+            config.GetValue<string>("Storage:AudioContainer") ?? "audiobooks";
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

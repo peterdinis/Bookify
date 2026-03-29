@@ -10,7 +10,8 @@ namespace Bookify.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     // [Authorize] // Require user login
-    public class PlaybackController(AppDbContext context, IBlobStorageService blobStorageService) : ControllerBase
+    public class PlaybackController(AppDbContext context, IBlobStorageService blobStorageService)
+        : ControllerBase
     {
         private readonly AppDbContext _context = context;
         private readonly IBlobStorageService _blobStorageService = blobStorageService;
