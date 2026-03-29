@@ -9,14 +9,9 @@ namespace Bookify.API.Controllers
 {
     [ApiController]
     [Route("api/auth")]
-    public class AuthController : ControllerBase
+    public class AuthController(AppDbContext context) : ControllerBase
     {
-        private readonly AppDbContext _context;
-
-        public AuthController(AppDbContext context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         /// <summary>
         /// Returns Entra (Azure AD) configuration for client-side login. Use this to redirect users to Microsoft sign-in.

@@ -7,14 +7,9 @@ namespace Bookify.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     // [Authorize(Roles = "Admin")] // Uncomment when EntraID is fully tested
-    public class AdminController : ControllerBase
+    public class AdminController(AppDbContext context) : ControllerBase
     {
-        private readonly AppDbContext _context;
-
-        public AdminController(AppDbContext context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         [HttpPost("audiobooks/{id}/approve")]
         public async Task<IActionResult> ApproveAudiobook(Guid id, [FromQuery] bool approve = true)

@@ -10,18 +10,12 @@ namespace Bookify.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     // [Authorize] // Require user login
-    public class PlaybackController : ControllerBase
+    public class PlaybackController(AppDbContext context, IBlobStorageService blobStorageService) : ControllerBase
     {
-        private readonly AppDbContext _context;
-        private readonly IBlobStorageService _blobStorageService;
+        private readonly AppDbContext _context = context;
+        private readonly IBlobStorageService _blobStorageService = blobStorageService;
 
-        public PlaybackController(AppDbContext context, IBlobStorageService blobStorageService)
-        {
-            _context = context;
-            _blobStorageService = blobStorageService;
-        }
-
-        private Guid GetCurrentUserId()
+        private static Guid GetCurrentUserId()
         {
             // For now, mock a user ID until Entra ID is fully tested by user
             // In real app: return Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));

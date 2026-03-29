@@ -11,16 +11,11 @@ namespace Bookify.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     // [Authorize] // Uncomment after configuring AD fully to protect
-    public class AudiobooksController : ControllerBase
+    public class AudiobooksController(AppDbContext context, IBlobStorageService blobStorageService)
+        : ControllerBase
     {
-        private readonly AppDbContext _context;
-        private readonly IBlobStorageService _blobStorageService;
-
-        public AudiobooksController(AppDbContext context, IBlobStorageService blobStorageService)
-        {
-            _context = context;
-            _blobStorageService = blobStorageService;
-        }
+        private readonly AppDbContext _context = context;
+        private readonly IBlobStorageService _blobStorageService = blobStorageService;
 
         [HttpGet]
         [EnableQuery]
@@ -59,7 +54,7 @@ namespace Bookify.API.Controllers
                     new ValidationProblemDetails(
                         new Dictionary<string, string[]>
                         {
-                            ["Title"] = new[] { "The Title field is required." },
+                            ["Title"] = ["The Title field is required."],
                         }
                     )
                 );
@@ -69,7 +64,7 @@ namespace Bookify.API.Controllers
                     new ValidationProblemDetails(
                         new Dictionary<string, string[]>
                         {
-                            ["Author"] = new[] { "The Author field is required." },
+                            ["Author"] = ["The Author field is required."],
                         }
                     )
                 );
