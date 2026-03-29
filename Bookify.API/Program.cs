@@ -1,14 +1,14 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Web;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.OData;
-using Microsoft.AspNetCore.Mvc;
 using Azure.Storage.Blobs;
 using Bookify.API.Data;
-using Bookify.API.Models;
 using Bookify.API.Middleware;
+using Bookify.API.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 
-var  MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,15 +17,18 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-                      policy  =>
-                      {
-                          policy.WithOrigins("http://localhost:3000");
-                      });
+    options.AddPolicy(
+        name: MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000");
+        }
+    );
 });
 
 // Add services to the container.
-builder.Services.AddControllers()
+builder
+    .Services.AddControllers()
     .AddOData(options => options.Select().Filter().OrderBy().Expand().Count().SetMaxTop(100))
     .ConfigureApiBehaviorOptions(options =>
     {
@@ -37,7 +40,7 @@ builder.Services.AddControllers()
                 Status = StatusCodes.Status400BadRequest,
                 Title = "One or more validation errors occurred.",
                 Detail = "Please refer to the errors property for additional details.",
-                Instance = context.HttpContext.Request.Path
+                Instance = context.HttpContext.Request.Path,
             };
             return new BadRequestObjectResult(problemDetails);
         };
@@ -49,20 +52,24 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // DbContext
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? "Data Source=bookify.db";
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(connectionString));
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=bookify.db";
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
 
 // Authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder
+    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
 // Azure Blob Storage (use development storage when ConnectionString not set)
-var blobConnectionString = builder.Configuration.GetValue<string>("Storage:ConnectionString")
+var blobConnectionString =
+    builder.Configuration.GetValue<string>("Storage:ConnectionString")
     ?? "UseDevelopmentStorage=true";
 builder.Services.AddSingleton(_ => new BlobServiceClient(blobConnectionString));
-builder.Services.AddScoped<Bookify.API.Services.IBlobStorageService, Bookify.API.Services.BlobStorageService>();
+builder.Services.AddScoped<
+    Bookify.API.Services.IBlobStorageService,
+    Bookify.API.Services.BlobStorageService
+>();
 
 // Background Worker
 builder.Services.AddHostedService<Bookify.API.Services.AudioMetadataWorker>();
@@ -109,13 +116,15 @@ using (var scope = app.Services.CreateScope())
     var devUserId = new Guid("00000000-0000-0000-0000-000000000001");
     if (app.Environment.IsDevelopment() && !dbContext.Users.Any(u => u.Id == devUserId))
     {
-        dbContext.Users.Add(new User
-        {
-            Id = devUserId,
-            EntraId = "dev-mock-user",
-            Role = "User",
-            IsActive = true
-        });
+        dbContext.Users.Add(
+            new User
+            {
+                Id = devUserId,
+                EntraId = "dev-mock-user",
+                Role = "User",
+                IsActive = true,
+            }
+        );
         dbContext.SaveChanges();
     }
 }

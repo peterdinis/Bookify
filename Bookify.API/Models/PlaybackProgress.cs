@@ -1,5 +1,3 @@
-using System;
-
 namespace Bookify.API.Models
 {
     public class PlaybackProgress

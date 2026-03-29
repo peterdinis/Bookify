@@ -2,9 +2,6 @@ using System.IO;
 using Azure.Storage.Blobs;
 using Bookify.API.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Bookify.API.Services
 {

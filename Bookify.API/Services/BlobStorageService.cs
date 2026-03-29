@@ -1,15 +1,19 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
-using Microsoft.Extensions.Configuration;
 
 namespace Bookify.API.Services
 {
-    public class BlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration) : IBlobStorageService
+    public class BlobStorageService(
+        BlobServiceClient blobServiceClient,
+        IConfiguration configuration
+    ) : IBlobStorageService
     {
         private readonly BlobServiceClient _blobServiceClient = blobServiceClient;
-        private readonly string _audioContainerName = configuration.GetValue<string>("Storage:AudioContainer") ?? "audiobooks";
-        private readonly string _coverContainerName = configuration.GetValue<string>("Storage:CoverContainer") ?? "covers";
+        private readonly string _audioContainerName =
+            configuration.GetValue<string>("Storage:AudioContainer") ?? "audiobooks";
+        private readonly string _coverContainerName =
+            configuration.GetValue<string>("Storage:CoverContainer") ?? "covers";
 
         private async Task EnsureContainersCreatedAsync()
         {
@@ -20,24 +24,38 @@ namespace Bookify.API.Services
             await coverContainer.CreateIfNotExistsAsync(PublicAccessType.Blob); // Covers can be publicly readable
         }
 
-        public async Task<string> UploadAudioAsync(string fileName, Stream content, string contentType)
+        public async Task<string> UploadAudioAsync(
+            string fileName,
+            Stream content,
+            string contentType
+        )
         {
             await EnsureContainersCreatedAsync();
             var containerClient = _blobServiceClient.GetBlobContainerClient(_audioContainerName);
             var blobClient = containerClient.GetBlobClient(fileName);
 
-            await blobClient.UploadAsync(content, new BlobHttpHeaders { ContentType = contentType });
+            await blobClient.UploadAsync(
+                content,
+                new BlobHttpHeaders { ContentType = contentType }
+            );
 
-            return fileName; 
+            return fileName;
         }
 
-        public async Task<string> UploadCoverAsync(string fileName, Stream content, string contentType)
+        public async Task<string> UploadCoverAsync(
+            string fileName,
+            Stream content,
+            string contentType
+        )
         {
             await EnsureContainersCreatedAsync();
             var containerClient = _blobServiceClient.GetBlobContainerClient(_coverContainerName);
             var blobClient = containerClient.GetBlobClient(fileName);
 
-            await blobClient.UploadAsync(content, new BlobHttpHeaders { ContentType = contentType });
+            await blobClient.UploadAsync(
+                content,
+                new BlobHttpHeaders { ContentType = contentType }
+            );
 
             return blobClient.Uri?.ToString() ?? string.Empty;
         }
@@ -49,7 +67,9 @@ namespace Bookify.API.Services
 
             if (!blobClient.CanGenerateSasUri)
             {
-                throw new InvalidOperationException("BlobClient cannot generate SAS Uri. Ensure connection string has rights.");
+                throw new InvalidOperationException(
+                    "BlobClient cannot generate SAS Uri. Ensure connection string has rights."
+                );
             }
 
             var sasBuilder = new BlobSasBuilder
@@ -58,7 +78,7 @@ namespace Bookify.API.Services
                 BlobName = blobName,
                 Resource = "b",
                 StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5),
-                ExpiresOn = DateTimeOffset.UtcNow.Add(expiresIn)
+                ExpiresOn = DateTimeOffset.UtcNow.Add(expiresIn),
             };
 
             sasBuilder.SetPermissions(BlobSasPermissions.Read);

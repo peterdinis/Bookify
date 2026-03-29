@@ -1,7 +1,3 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
-
 namespace Bookify.API.Services
 {
     public interface IBlobStorageService
