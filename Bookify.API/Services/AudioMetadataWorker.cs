@@ -1,10 +1,10 @@
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
+using System.IO;
 using Azure.Storage.Blobs;
 using Bookify.API.Data;
-using System.IO;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Bookify.API.Services
 {
@@ -15,7 +15,12 @@ namespace Bookify.API.Services
         private readonly ILogger<AudioMetadataWorker> _logger;
         private readonly string _audioContainerName;
 
-        public AudioMetadataWorker(IServiceProvider serviceProvider, BlobServiceClient blobServiceClient, ILogger<AudioMetadataWorker> logger, IConfiguration config)
+        public AudioMetadataWorker(
+            IServiceProvider serviceProvider,
+            BlobServiceClient blobServiceClient,
+            ILogger<AudioMetadataWorker> logger,
+            IConfiguration config
+        )
         {
             _serviceProvider = serviceProvider;
             _blobServiceClient = blobServiceClient;
@@ -32,14 +37,16 @@ namespace Bookify.API.Services
                     using var scope = _serviceProvider.CreateScope();
                     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-                    var chaptersToProcess = await dbContext.Chapters
-                        .Where(c => c.DurationSeconds == 0)
+                    var chaptersToProcess = await dbContext
+                        .Chapters.Where(c => c.DurationSeconds == 0)
                         .Take(10)
                         .ToListAsync(stoppingToken);
 
                     foreach (var chapter in chaptersToProcess)
                     {
-                        var containerClient = _blobServiceClient.GetBlobContainerClient(_audioContainerName);
+                        var containerClient = _blobServiceClient.GetBlobContainerClient(
+                            _audioContainerName
+                        );
                         var blobClient = containerClient.GetBlobClient(chapter.AudioBlobName);
 
                         if (await blobClient.ExistsAsync(stoppingToken))
@@ -48,23 +55,30 @@ namespace Bookify.API.Services
                             try
                             {
                                 await blobClient.DownloadToAsync(tempFile, stoppingToken);
-                                
+
                                 using (var tfile = TagLib.File.Create(tempFile))
                                 {
-                                    chapter.DurationSeconds = tfile.Properties?.Duration.TotalSeconds ?? 0;
+                                    chapter.DurationSeconds =
+                                        tfile.Properties?.Duration.TotalSeconds ?? 0;
                                 }
-                                
-                                _logger.LogInformation($"Processed duration for chapter {chapter.Id}: {chapter.DurationSeconds}s");
+
+                                _logger.LogInformation(
+                                    $"Processed duration for chapter {chapter.Id}: {chapter.DurationSeconds}s"
+                                );
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError(ex, $"Error processing metadata for chapter {chapter.Id}");
+                                _logger.LogError(
+                                    ex,
+                                    $"Error processing metadata for chapter {chapter.Id}"
+                                );
                                 // Set to -1 to avoid infinite retries on corrupted files
-                                chapter.DurationSeconds = -1; 
+                                chapter.DurationSeconds = -1;
                             }
                             finally
                             {
-                                if (File.Exists(tempFile)) File.Delete(tempFile);
+                                if (File.Exists(tempFile))
+                                    File.Delete(tempFile);
                             }
                         }
                         else
