@@ -21,7 +21,10 @@ builder.Services.AddCors(options =>
         name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000");
+            policy
+                .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
         }
     );
 });
@@ -56,10 +59,12 @@ var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=bookify.db";
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
 
-// Authentication
+// Len JWT — prihlásenie cez MSAL na fronte; backend len overuje token a ukladá dáta
 builder
     .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+
+builder.Services.AddAuthorization();
 
 // Azure Blob Storage (use development storage when ConnectionString not set)
 var blobConnectionString =
@@ -73,14 +78,6 @@ builder.Services.AddScoped<
 
 // Background Worker
 builder.Services.AddHostedService<Bookify.API.Services.AudioMetadataWorker>();
-
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-    });
-});
 
 var app = builder.Build();
 
@@ -97,7 +94,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors(MyAllowSpecificOrigins);
 
@@ -112,7 +112,6 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     dbContext.Database.EnsureCreated();
 
-    // Ensure default dev user exists so playback endpoints work when auth is not yet configured
     var devUserId = new Guid("00000000-0000-0000-0000-000000000001");
     if (app.Environment.IsDevelopment() && !dbContext.Users.Any(u => u.Id == devUserId))
     {
