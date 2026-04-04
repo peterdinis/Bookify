@@ -1,12 +1,15 @@
+using System.Text;
 using Azure.Storage.Blobs;
 using Bookify.API.Data;
 using Bookify.API.Middleware;
 using Bookify.API.Models;
+using Bookify.API.Options;
+using Bookify.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Tokens;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -21,7 +24,10 @@ builder.Services.AddCors(options =>
         name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000");
+            policy
+                .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
         }
     );
 });
@@ -56,10 +62,41 @@ var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=bookify.db";
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
 
-// Authentication
+// Vlastný JWT po POST /api/auth/session (Entra len na fronte cez MSAL).
+builder.Services.Configure<SessionJwtOptions>(
+    builder.Configuration.GetSection(SessionJwtOptions.SectionName)
+);
+builder.Services.AddSingleton<SessionJwtService>();
+
+var sessionJwtSection = builder.Configuration.GetSection(SessionJwtOptions.SectionName);
+var signingKey = sessionJwtSection.GetValue<string>("SigningKey") ?? string.Empty;
+if (signingKey.Length < 32)
+{
+    throw new InvalidOperationException(
+        "SessionJwt:SigningKey must be at least 32 characters. Set it in appsettings, user secrets, or environment."
+    );
+}
+
+var symmetricKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey));
+
 builder
     .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = symmetricKey,
+            ValidIssuer = sessionJwtSection["Issuer"],
+            ValidAudience = sessionJwtSection["Audience"],
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(2),
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 // Azure Blob Storage (use development storage when ConnectionString not set)
 var blobConnectionString =
@@ -73,14 +110,6 @@ builder.Services.AddScoped<
 
 // Background Worker
 builder.Services.AddHostedService<Bookify.API.Services.AudioMetadataWorker>();
-
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-    });
-});
 
 var app = builder.Build();
 
@@ -97,7 +126,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors(MyAllowSpecificOrigins);
 
@@ -112,7 +144,6 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     dbContext.Database.EnsureCreated();
 
-    // Ensure default dev user exists so playback endpoints work when auth is not yet configured
     var devUserId = new Guid("00000000-0000-0000-0000-000000000001");
     if (app.Environment.IsDevelopment() && !dbContext.Users.Any(u => u.Id == devUserId))
     {

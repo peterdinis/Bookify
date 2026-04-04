@@ -37,6 +37,14 @@ namespace Bookify.API.Middleware
             {
                 problemDetails.Detail = exception.Message;
                 problemDetails.Extensions["stackTrace"] = exception.StackTrace;
+                var inner = exception.InnerException;
+                var depth = 0;
+                while (inner != null && depth < 5)
+                {
+                    problemDetails.Extensions[$"innerException{depth}"] = inner.Message;
+                    inner = inner.InnerException;
+                    depth++;
+                }
             }
 
             httpContext.Response.StatusCode = problemDetails.Status.Value;
