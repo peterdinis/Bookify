@@ -1,12 +1,15 @@
+using System.Text;
 using Azure.Storage.Blobs;
 using Bookify.API.Data;
 using Bookify.API.Middleware;
 using Bookify.API.Models;
+using Bookify.API.Options;
+using Bookify.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Tokens;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -59,10 +62,39 @@ var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=bookify.db";
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
 
-// Len JWT — prihlásenie cez MSAL na fronte; backend len overuje token a ukladá dáta
+// Vlastný JWT po POST /api/auth/session (Entra len na fronte cez MSAL).
+builder.Services.Configure<SessionJwtOptions>(
+    builder.Configuration.GetSection(SessionJwtOptions.SectionName)
+);
+builder.Services.AddSingleton<SessionJwtService>();
+
+var sessionJwtSection = builder.Configuration.GetSection(SessionJwtOptions.SectionName);
+var signingKey = sessionJwtSection.GetValue<string>("SigningKey") ?? string.Empty;
+if (signingKey.Length < 32)
+{
+    throw new InvalidOperationException(
+        "SessionJwt:SigningKey must be at least 32 characters. Set it in appsettings, user secrets, or environment."
+    );
+}
+
+var symmetricKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey));
+
 builder
     .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = symmetricKey,
+            ValidIssuer = sessionJwtSection["Issuer"],
+            ValidAudience = sessionJwtSection["Audience"],
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(2),
+        };
+    });
 
 builder.Services.AddAuthorization();
 
